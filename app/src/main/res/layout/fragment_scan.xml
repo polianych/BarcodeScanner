@@ -4,10 +4,55 @@
     android:layout_height="match_parent"
     tools:context="com.example.poliakov.barcodescanner.ScanFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintBottom_creator="1"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        tools:layout_constraintLeft_creator="1"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="SCAN" />
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteY="0dp">
+            <SurfaceView
+                android:layout_width="match_parent"
+                android:layout_height="780px"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/camera_view"
+                />
+            <TextView android:text=""
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtContent"/>
+
+            <Button
+                android:id="@+id/start_scan_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:text="Start Scan"
+                />
+            <Button
+                android:id="@+id/stop_scan_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_alignParentTop="true"
+                android:text="Stop Scan" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </FrameLayout>
