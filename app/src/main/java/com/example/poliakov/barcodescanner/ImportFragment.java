@@ -1,27 +1,23 @@
 package com.example.poliakov.barcodescanner;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import android.widget.Button;
 
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link SelectFragment#newInstance} factory method to
+ * Use the {@link ImportFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SelectFragment extends Fragment implements OnClickListener {
+public class ImportFragment extends Fragment implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -31,9 +27,8 @@ public class SelectFragment extends Fragment implements OnClickListener {
     private String mParam1;
     private String mParam2;
 
-//    private OnFragmentInteractionListener mListener;
 
-    public SelectFragment() {
+    public ImportFragment() {
         // Required empty public constructor
     }
 
@@ -43,11 +38,11 @@ public class SelectFragment extends Fragment implements OnClickListener {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment SelectFragment.
+     * @return A new instance of fragment ImportFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SelectFragment newInstance(String param1, String param2) {
-        SelectFragment fragment = new SelectFragment();
+    public static ImportFragment newInstance(String param1, String param2) {
+        ImportFragment fragment = new ImportFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -65,27 +60,23 @@ public class SelectFragment extends Fragment implements OnClickListener {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View RootView = inflater.inflate(R.layout.fragment_select, container, false);
-
-        FloatingActionButton importButton = (FloatingActionButton) RootView.findViewById(R.id.import_button);
-        importButton.setOnClickListener(this);
-        return RootView;
+    public void onClick(View view) {
+        if(view.getId() == R.id.add_csv_file) {
+            Log.i("","clicked add scv file"+"\n");
+            MainActivity activity = (MainActivity) getActivity();
+            activity.readCsvFile();
+        }
     }
 
     @Override
-    public void onClick(View view) {
-        final SelectFragment fragment = this;
-        switch (view.getId()) {
-            case R.id.import_button:
-                Fragment importFragment = new ImportFragment();
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.flContent, importFragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-        }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        Log.i("","import fragment created"+"\n");
+        View RootView = inflater.inflate(R.layout.fragment_import, container, false);
+        Button addCsvFile = (Button) RootView.findViewById(R.id.add_csv_file);
+        addCsvFile.setOnClickListener(this);
+        return RootView;
     }
+
 }
