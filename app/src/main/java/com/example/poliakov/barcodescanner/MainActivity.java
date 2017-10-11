@@ -143,17 +143,9 @@ public class MainActivity extends AppCompatActivity
     private void readTextFile(Uri uri) {
         InputStream inputStream = null;
         try {
-            inputStream = getContentResolver().openInputStream(uri);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    inputStream));
-
-            String line;
-            Log.i("","open text file - content"+"\n");
-            while ((line = reader.readLine()) != null) {
-                Log.i("",line+"\n");
-            }
-            reader.close();
-            inputStream.close();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            ImportFragment fragment = (ImportFragment) fragmentManager.findFragmentByTag(SelectFragment.IMPORT_FRAGMENT_TAG);
+            fragment.setImportFileUri(uri);
         } catch (Exception e) {
             e.printStackTrace();
         }

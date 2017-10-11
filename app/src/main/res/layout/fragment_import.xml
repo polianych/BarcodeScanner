@@ -5,6 +5,7 @@
     android:padding="16dp">
 
     <EditText
+        android:id="@+id/import_name_edit_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorPrimaryDark"
@@ -24,6 +25,7 @@
         android:text="Add CSV file" />
 
     <Button
+        android:id="@+id/import_csv_file"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
