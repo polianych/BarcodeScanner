@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +18,8 @@ import android.view.View.OnClickListener;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+
+import java.util.List;
 
 
 /**
@@ -73,6 +79,18 @@ public class SelectFragment extends Fragment implements OnClickListener {
 
         FloatingActionButton importButton = (FloatingActionButton) RootView.findViewById(R.id.import_button);
         importButton.setOnClickListener(this);
+
+        DaoSession daoSession = ((App) getActivity().getApplication()).getDaoSession();
+        BarcodeDatabaseDao BarcodeDatabaseDao = daoSession.getBarcodeDatabaseDao();
+        List barcodeDatabaseList = BarcodeDatabaseDao.loadAll();
+
+        RecyclerView recyclerView = (RecyclerView) RootView.findViewById(R.id.barcode_database_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        BarcodeDatabaseAdapter adapter = new BarcodeDatabaseAdapter(barcodeDatabaseList);
+        recyclerView.setAdapter(adapter);
+        //Add divider between items of RecyclerView
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
         return RootView;
     }
 
