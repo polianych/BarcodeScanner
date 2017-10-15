@@ -4,8 +4,11 @@ package com.example.poliakov.barcodescanner;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
+import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -30,6 +34,8 @@ import android.Manifest;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -48,6 +54,8 @@ public class ScanFragment extends Fragment implements OnClickListener {
     private BarcodeDatabase mBarcodeDatabase;
     private static final String TAG = "MyActivity";
     private static final int PERMISSIONS_REQUEST_CAPTURE_IMAGE = 1;
+    private boolean flashmode = false;
+
     CameraSource cameraSource;
     TextView txtView;
     SurfaceView cameraView;
@@ -80,17 +88,16 @@ public class ScanFragment extends Fragment implements OnClickListener {
 //                fragmentTransaction.commit();
 //            }
         }
-        getActivity().setTitle("Scan");
+        getActivity().setTitle(mBarcodeDatabase.getName());
         final ScanFragment activity = this;
 
         View RootView = inflater.inflate(R.layout.fragment_scan, container, false);
 
         Button startBtn = (Button) RootView.findViewById(R.id.start_scan_button);
         Button stopBtn = (Button) RootView.findViewById(R.id.stop_scan_button);
+        Button flashBtn = (Button) RootView.findViewById(R.id.set_flash);
         this.txtView = (TextView) RootView.findViewById(R.id.txtContent);
-        TextView titleView = (TextView) RootView.findViewById(R.id.titleContent);
         this.cameraView = (SurfaceView) RootView.findViewById(R.id.camera_view);
-        titleView.setText(mBarcodeDatabase.getName());
         this.mediaPlayer = new MediaPlayer();
 //        this.mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 //            public void onCompletion(MediaPlayer mp) {
@@ -119,6 +126,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
         }
         startBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
+        flashBtn.setOnClickListener(this);
 
         return RootView;
     }
@@ -128,12 +136,13 @@ public class ScanFragment extends Fragment implements OnClickListener {
         final ScanFragment fragment = this;
         switch (v.getId()) {
             case R.id.start_scan_button:
-                Toast.makeText(getActivity(), "Start scan", Toast.LENGTH_SHORT).show();
                 fragment.startBarcodeScan();
                 break;
             case R.id.stop_scan_button:
-                Toast.makeText(getActivity(), "Stop scan", Toast.LENGTH_SHORT).show();
                 fragment.stopBarcodeScan();
+                break;
+            case R.id.set_flash:
+                fragment.flashOnButton();
                 break;
         };
     }
@@ -175,6 +184,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
 
     public void startBarcodeScan() {
         final ScanFragment activity = this;
+        this.txtView.setText("");
         try {
             this.detector.setProcessor(new Detector.Processor<Barcode>() {
                 @Override
@@ -196,10 +206,100 @@ public class ScanFragment extends Fragment implements OnClickListener {
             });
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 this.cameraSource.start(this.cameraView.getHolder());
+                this.initCameraFocusListener();
             }
         } catch (IOException ie) {
             Log.e("CAMERA SOURCE", ie.getMessage());
         }
+    }
+
+    private void initCameraFocusListener() {
+        cameraView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                cameraFocus(event, cameraSource, Camera.Parameters.FOCUS_MODE_AUTO);
+                return false;
+            }
+        });
+    }
+
+    private boolean cameraFocus(MotionEvent event, @NonNull CameraSource cameraSource, @NonNull String focusMode) {
+        Field[] declaredFields = CameraSource.class.getDeclaredFields();
+
+        int pointerId = event.getPointerId(0);
+        int pointerIndex = event.findPointerIndex(pointerId);
+        // Get the pointer's current position
+        float x = event.getX(pointerIndex);
+        float y = event.getY(pointerIndex);
+
+        float touchMajor = event.getTouchMajor();
+        float touchMinor = event.getTouchMinor();
+
+        Rect touchRect = new Rect((int)(x - touchMajor / 2), (int)(y - touchMinor / 2), (int)(x + touchMajor / 2), (int)(y + touchMinor / 2));
+        Rect focusArea = new Rect();
+
+        focusArea.set(touchRect.left * 2000 / cameraView.getWidth() - 1000,
+                touchRect.top * 2000 / cameraView.getHeight() - 1000,
+                touchRect.right * 2000 / cameraView.getWidth() - 1000,
+                touchRect.bottom * 2000 / cameraView.getHeight() - 1000);
+
+        // Submit focus area to camera
+
+        ArrayList<Camera.Area> focusAreas = new ArrayList<Camera.Area>();
+        focusAreas.add(new Camera.Area(focusArea, 1000));
+
+        Camera camera = getCamera(this.cameraSource);
+        if (camera != null) {
+            Camera.Parameters params = camera.getParameters();
+            params.setFocusMode(focusMode);
+            params.setFocusAreas(focusAreas);
+            camera.setParameters(params);
+            // Start the autofocus operation
+            camera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean b, Camera camera) {
+                    // currently set to auto-focus on single touch
+                }
+            });
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void flashOnButton() {
+        Camera camera = getCamera(this.cameraSource);
+        if (camera != null) {
+            try {
+                Camera.Parameters param = camera.getParameters();
+                param.setFlashMode(!flashmode?Camera.Parameters.FLASH_MODE_TORCH :Camera.Parameters.FLASH_MODE_OFF);
+                camera.setParameters(param);
+                flashmode = !flashmode;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    private static Camera getCamera(@NonNull CameraSource cameraSource) {
+        Field[] declaredFields = CameraSource.class.getDeclaredFields();
+
+        for (Field field : declaredFields) {
+            if (field.getType() == Camera.class) {
+                field.setAccessible(true);
+                try {
+                    Camera camera = (Camera) field.get(cameraSource);
+                    if (camera != null) {
+                        return camera;
+                    }
+                    return null;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+        return null;
     }
 
     private void onDetectBarcode(String value) {

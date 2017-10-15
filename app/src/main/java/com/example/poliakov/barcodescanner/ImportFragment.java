@@ -94,6 +94,7 @@ public class ImportFragment extends Fragment implements View.OnClickListener{
         String name = this.nameEditText.getText().toString();
         if(name.length() == 0) {
             Toast.makeText(getActivity(), "Please type name of BarcodeDatabase", Toast.LENGTH_SHORT).show();
+            return;
         }
         this.importCsvFileBtn.setEnabled(false);
 
