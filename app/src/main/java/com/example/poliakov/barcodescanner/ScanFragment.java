@@ -39,6 +39,9 @@ public class ScanFragment extends Fragment implements OnClickListener {
     public ScanFragment() {
         // Required empty public constructor
     }
+    private static final String BARCODE_DATABASE_ID = "barcodeDatabaseId";
+    private Long mBarcodeDatabaseId;
+    private BarcodeDatabase mBarcodeDatabase;
     private static final String TAG = "MyActivity";
     private static final int PERMISSIONS_REQUEST_CAPTURE_IMAGE = 1;
     CameraSource cameraSource;
@@ -46,12 +49,31 @@ public class ScanFragment extends Fragment implements OnClickListener {
     SurfaceView cameraView;
     Detector detector;
     MediaPlayer mediaPlayer;
-    //    private OnFragmentInteractionListener mListener;
+
+    public static ScanFragment newInstance(Long barcodeDatabaseId) {
+        ScanFragment fragment = new ScanFragment();
+        Bundle args = new Bundle();
+        args.putLong(BARCODE_DATABASE_ID, barcodeDatabaseId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mBarcodeDatabaseId = getArguments().getLong(BARCODE_DATABASE_ID);
+            DaoSession daoSession = ((App) getActivity().getApplication()).getDaoSession();
+            BarcodeDatabaseDao BarcodeDatabaseDao = daoSession.getBarcodeDatabaseDao();
+            mBarcodeDatabase = BarcodeDatabaseDao.load(mBarcodeDatabaseId);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().setTitle("Scan");
         final ScanFragment activity = this;
 
         View RootView = inflater.inflate(R.layout.fragment_scan, container, false);
@@ -59,8 +81,9 @@ public class ScanFragment extends Fragment implements OnClickListener {
         Button startBtn = (Button) RootView.findViewById(R.id.start_scan_button);
         Button stopBtn = (Button) RootView.findViewById(R.id.stop_scan_button);
         this.txtView = (TextView) RootView.findViewById(R.id.txtContent);
+        TextView titleView = (TextView) RootView.findViewById(R.id.titleContent);
         this.cameraView = (SurfaceView) RootView.findViewById(R.id.camera_view);
-
+        titleView.setText(mBarcodeDatabase.getName());
         this.mediaPlayer = new MediaPlayer();
 //        this.mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 //            public void onCompletion(MediaPlayer mp) {

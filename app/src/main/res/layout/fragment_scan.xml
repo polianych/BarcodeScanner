@@ -23,9 +23,13 @@
             android:layout_height="fill_parent"
             android:orientation="vertical"
             tools:layout_editor_absoluteY="0dp">
+            <TextView android:text="test"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/titleContent"/>
             <SurfaceView
                 android:layout_width="match_parent"
-                android:layout_height="780px"
+                android:layout_height="700px"
                 android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
                 android:id="@+id/camera_view"

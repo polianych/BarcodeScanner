@@ -155,7 +155,7 @@ public class ImportFragment extends Fragment implements View.OnClickListener{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        Log.i("","import fragment created"+"\n");
+        getActivity().setTitle("Import");
         View RootView = inflater.inflate(R.layout.fragment_import, container, false);
         Button addCsvFileBtn = (Button) RootView.findViewById(R.id.add_csv_file);
         this.importCsvFileBtn = (Button) RootView.findViewById(R.id.import_csv_file);

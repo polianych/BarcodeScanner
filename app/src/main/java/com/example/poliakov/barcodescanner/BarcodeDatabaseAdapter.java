@@ -8,10 +8,15 @@ import android.widget.TextView;
 import java.util.List;
 public class BarcodeDatabaseAdapter extends RecyclerView.Adapter<BarcodeDatabaseAdapter.ViewHolder> {
 
+    public interface OnItemClickListener {
+        void onItemClick(BarcodeDatabase item);
+    }
     private List<BarcodeDatabase> mData;
+    private final OnItemClickListener listener;
 
-    public BarcodeDatabaseAdapter(List<BarcodeDatabase> mData) {
+    public BarcodeDatabaseAdapter(List<BarcodeDatabase> mData, OnItemClickListener listener) {
         this.mData = mData;
+        this.listener = listener;
     }
 
     @Override
@@ -24,8 +29,8 @@ public class BarcodeDatabaseAdapter extends RecyclerView.Adapter<BarcodeDatabase
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        viewHolder.textViewName.setText(mData.get(position).getName());
-        viewHolder.textViewCountCodes.setText(mData.get(position).getBarcodesCount().toString());
+
+        viewHolder.bind(mData.get(position), listener);
     }
 
     @Override
@@ -34,13 +39,23 @@ public class BarcodeDatabaseAdapter extends RecyclerView.Adapter<BarcodeDatabase
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView textViewName;
-        public TextView textViewCountCodes;
+        private TextView textViewName;
+        private TextView textViewCountCodes;
 
         public ViewHolder(View itemView) {
             super(itemView);
             textViewName = (TextView) itemView.findViewById(R.id.barcode_database_list_item_name);
             textViewCountCodes = (TextView) itemView.findViewById(R.id.barcode_database_list_item_count_codes);
+        }
+
+        public void bind(final BarcodeDatabase item, final OnItemClickListener listener) {
+            textViewName.setText(item.getName());
+            textViewCountCodes.setText(item.getBarcodesCount().toString());
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    listener.onItemClick(item);
+                }
+            });
         }
     }
 }
