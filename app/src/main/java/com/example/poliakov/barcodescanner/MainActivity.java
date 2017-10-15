@@ -90,12 +90,10 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         Fragment fragment = null;
         Class fragmentClass;
-        if (id == R.id.nav_camera) {
-            fragmentClass = ScanFragment.class;
-        } else if (id == R.id.nav_gallery) {
+         if (id == R.id.nav_gallery) {
             fragmentClass = SelectFragment.class;
         } else {
-            fragmentClass = ScanFragment.class;
+            fragmentClass = SelectFragment.class;
         }
 
         try {

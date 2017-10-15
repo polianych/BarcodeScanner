@@ -8,6 +8,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
@@ -28,6 +30,8 @@ import android.Manifest;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -59,20 +63,23 @@ public class ScanFragment extends Fragment implements OnClickListener {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mBarcodeDatabaseId = getArguments().getLong(BARCODE_DATABASE_ID);
             DaoSession daoSession = ((App) getActivity().getApplication()).getDaoSession();
             BarcodeDatabaseDao BarcodeDatabaseDao = daoSession.getBarcodeDatabaseDao();
             mBarcodeDatabase = BarcodeDatabaseDao.load(mBarcodeDatabaseId);
+//            if (mBarcodeDatabase == null) {
+//                Toast.makeText(getActivity(), "Please, select DB", Toast.LENGTH_SHORT).show();
+//                Fragment selectFragment = new SelectFragment();
+//                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//                fragmentTransaction.replace(R.id.flContent, selectFragment);
+//                fragmentTransaction.commit();
+//            }
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         getActivity().setTitle("Scan");
         final ScanFragment activity = this;
 
@@ -147,6 +154,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
                 .Builder(getActivity().getApplicationContext(), this.detector)
                 .setRequestedPreviewSize(640, 780)
                 .setAutoFocusEnabled(true)
+                .setRequestedFps(15.0f)
                 .build();
         this.cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -180,10 +188,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
                         activity.txtView.post(new Runnable() {    // Use the post method of the TextView
                             public void run() {
                                 activity.stopBarcodeScan();
-                                activity.processScannedValue(barcodes.valueAt(0).displayValue);
-                                activity.txtView.setText(    // Update the TextView
-                                        barcodes.valueAt(0).displayValue
-                                );
+                                activity.onDetectBarcode(barcodes.valueAt(0).displayValue);
                             }
                         });
                     }
@@ -197,12 +202,53 @@ public class ScanFragment extends Fragment implements OnClickListener {
         }
     }
 
+    private void onDetectBarcode(String value) {
+        DaoSession daoSession = ((App) getActivity().getApplication()).getDaoSession();
+        BarcodeDao barcodeDao = daoSession.getBarcodeDao();
+        BarcodeScanDao barcodeScanDao = daoSession.getBarcodeScanDao();
+
+        BarcodeScan barcodeScan = new BarcodeScan();
+        barcodeScan.setDate(new Date());
+        barcodeScan.setBarcodeDatabaseId(mBarcodeDatabase.getId());
+        barcodeScan.setCode(value);
+
+        if (barcodeDao.queryBuilder()
+                .where(BarcodeDao.Properties.Code.eq(value))
+                .where(BarcodeDao.Properties.BarcodeDatabaseId.eq(mBarcodeDatabase.getId())).count() == 1) {
+            Long validBarcodesCount = barcodeScanDao.queryBuilder()
+                    .where(BarcodeScanDao.Properties.BarcodeDatabaseId.eq(mBarcodeDatabase.getId()))
+                    .where(BarcodeScanDao.Properties.Code.eq(value))
+                    .where(BarcodeScanDao.Properties.Type.eq(BarcodeScan.VALID_TYPE))
+                    .count();
+            if (validBarcodesCount == 0) {
+                barcodeScan.setType(BarcodeScan.VALID_TYPE);
+            } else {
+                barcodeScan.setType(BarcodeScan.PRESENT_TYPE);
+            }
+        } else {
+            barcodeScan.setType(BarcodeScan.NOT_FOUND_TYPE);
+        }
+        barcodeScanDao.insert(barcodeScan);
+        processScannedValue(barcodeScan);
+    }
+
     public void stopBarcodeScan() {
         this.detector.release();
         this.cameraSource.stop();
     }
 
-    public void processScannedValue(String value) {
+    public void processScannedValue(BarcodeScan barcodeScan) {
+        switch (barcodeScan.getType()) {
+            case BarcodeScan.VALID_TYPE:
+                this.txtView.setText("Success! " + barcodeScan.getCode() + " valid");
+                break;
+            case BarcodeScan.NOT_FOUND_TYPE:
+                this.txtView.setText("Error! " + barcodeScan.getCode() + " not found");
+                break;
+            case BarcodeScan.PRESENT_TYPE:
+                this.txtView.setText("Error! " + barcodeScan.getCode() + " already scanned");
+                break;
+        }
 //        if (value.equals("Hello World!")) {
 //            try{
 //                AssetFileDescriptor afd = getApplicationContext().getAssets().openFd("coin.mp3");
