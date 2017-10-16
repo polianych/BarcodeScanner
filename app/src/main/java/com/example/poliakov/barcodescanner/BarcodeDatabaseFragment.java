@@ -83,7 +83,7 @@ public class BarcodeDatabaseFragment extends Fragment implements View.OnClickLis
                 Fragment scanFragment = ScanFragment.newInstance(mBarcodeDatabase.getId());
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.flContent, scanFragment);
+                fragmentTransaction.replace(R.id.flContent, scanFragment, ScanFragment.SCAN_FRAGMENT_TAG);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
                 break;

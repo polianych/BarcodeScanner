@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -44,6 +45,8 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class ScanFragment extends Fragment implements OnClickListener {
+
+    public static final String SCAN_FRAGMENT_TAG = "fragment:scan";
 
 
     public ScanFragment() {
@@ -96,6 +99,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
         Button startBtn = (Button) RootView.findViewById(R.id.start_scan_button);
         Button stopBtn = (Button) RootView.findViewById(R.id.stop_scan_button);
         Button flashBtn = (Button) RootView.findViewById(R.id.set_flash);
+        Button openManualEnterDialogBtn = (Button) RootView.findViewById(R.id.open_manual_enter_dialog);
         this.txtView = (TextView) RootView.findViewById(R.id.txtContent);
         this.cameraView = (SurfaceView) RootView.findViewById(R.id.camera_view);
         this.mediaPlayer = new MediaPlayer();
@@ -127,6 +131,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
         startBtn.setOnClickListener(this);
         stopBtn.setOnClickListener(this);
         flashBtn.setOnClickListener(this);
+        openManualEnterDialogBtn.setOnClickListener(this);
 
         return RootView;
     }
@@ -143,6 +148,9 @@ public class ScanFragment extends Fragment implements OnClickListener {
                 break;
             case R.id.set_flash:
                 fragment.flashOnButton();
+                break;
+            case R.id.open_manual_enter_dialog:
+                fragment.openManualEnterDialog();
                 break;
         };
     }
@@ -302,7 +310,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
         return null;
     }
 
-    private void onDetectBarcode(String value) {
+    public void onDetectBarcode(String value) {
         DaoSession daoSession = ((App) getActivity().getApplication()).getDaoSession();
         BarcodeDao barcodeDao = daoSession.getBarcodeDao();
         BarcodeScanDao barcodeScanDao = daoSession.getBarcodeScanDao();
@@ -386,4 +394,9 @@ public class ScanFragment extends Fragment implements OnClickListener {
         }
     }
 
+    public void openManualEnterDialog() {
+        ManualEnterDialogFragment dialogFragment = new ManualEnterDialogFragment();
+        dialogFragment.show(getActivity().getSupportFragmentManager(), "manual_enter_dialog");
+        stopBarcodeScan();
+    }
 }

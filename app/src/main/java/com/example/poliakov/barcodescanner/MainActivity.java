@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ManualEnterDialogFragment.ManualEnterDialogListener{
     static final int READ_REQ = 24;
 
     @Override
@@ -147,5 +147,16 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onDialogPositiveClick(String code) {
+        ScanFragment fragment = (ScanFragment) getSupportFragmentManager().findFragmentByTag(ScanFragment.SCAN_FRAGMENT_TAG);
+        fragment.onDetectBarcode(code);
+    }
+
+    @Override
+    public void onDialogNegativeClick(ManualEnterDialogFragment dialog) {
+
     }
 }
