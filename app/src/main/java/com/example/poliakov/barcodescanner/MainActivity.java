@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, ManualEnterDialogFragment.ManualEnterDialogListener{
+        implements NavigationView.OnNavigationItemSelectedListener, ManualEnterDialogFragment.ManualEnterDialogListener, ClearScansDialogFragment.ClearScansDialogListener{
     static final int READ_REQ = 24;
 
     @Override
@@ -68,20 +68,20 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -157,6 +157,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDialogNegativeClick(ManualEnterDialogFragment dialog) {
+
+    }
+
+    @Override
+    public void onPositiveClickClearScans(String code) {
+        BarcodeDatabaseFragment fragment = (BarcodeDatabaseFragment) getSupportFragmentManager().findFragmentByTag(BarcodeDatabaseFragment.BARCODE_DATABASE_FRAGMENT_TAG);
+        fragment.clearScansByPasscode(code);
+    }
+
+    @Override
+    public void onDialogNegativeClickClearScans(ClearScansDialogFragment dialog) {
 
     }
 }

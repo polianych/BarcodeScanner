@@ -27,10 +27,16 @@ public class BarcodeDatabaseFragment extends Fragment implements View.OnClickLis
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String BARCODE_DATABASE_ID = "barcodeDatabaseId";
+    public static final String BARCODE_DATABASE_FRAGMENT_TAG = "fragment:barcode_database";
+    public static final String PASSCODE_VALUE = "1819482";
+
 
     // TODO: Rename and change types of parameters
     private Long mBarcodeDatabaseId;
     private BarcodeDatabase mBarcodeDatabase;
+    private TextView databaseNameView;
+    private TextView barcodesScansCountView;
+    private TextView barcodesCountView;
 
     public BarcodeDatabaseFragment() {
         // Required empty public constructor
@@ -68,12 +74,21 @@ public class BarcodeDatabaseFragment extends Fragment implements View.OnClickLis
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View RootView = inflater.inflate(R.layout.fragment_barcode_database, container, false);
-        TextView databaseNameView = (TextView) RootView.findViewById(R.id.database_name);
+        this.databaseNameView = (TextView) RootView.findViewById(R.id.database_name);
+        this.barcodesScansCountView = (TextView) RootView.findViewById(R.id.barcodes_count);
+        this.barcodesCountView = (TextView) RootView.findViewById(R.id.barcodes_scans_count);
+        this.populateData();
         Button scanButton = RootView.findViewById(R.id.start_scan_button);
+        Button clearScansButton = RootView.findViewById(R.id.clear_scans_button);
         scanButton.setOnClickListener(this);
-        databaseNameView.setText(mBarcodeDatabase.getName());
-        getActivity().setTitle(mBarcodeDatabase.getName());
+        clearScansButton.setOnClickListener(this);
         return RootView;
+    }
+    private void populateData() {
+        getActivity().setTitle(mBarcodeDatabase.getName());
+        databaseNameView.setText(mBarcodeDatabase.getName());
+        barcodesScansCountView.setText(mBarcodeDatabase.getBarcodesCount().toString());
+        barcodesCountView.setText(mBarcodeDatabase.getBarcodesScansCount().toString());
     }
 
     @Override
@@ -87,7 +102,24 @@ public class BarcodeDatabaseFragment extends Fragment implements View.OnClickLis
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
                 break;
+            case R.id.clear_scans_button:
+                this.openClearScansDialo();
         };
+    }
+
+    public void openClearScansDialo() {
+        ClearScansDialogFragment dialogFragment = new ClearScansDialogFragment();
+        dialogFragment.show(getActivity().getSupportFragmentManager(), "clear_scans_dialog");
+    }
+
+    public void clearScansByPasscode(String passcode) {
+        if (PASSCODE_VALUE.equals(passcode)){
+            mBarcodeDatabase.deleteBarcodeScans();
+            Toast.makeText(getActivity(), "Barcode Scans related to this DB deleted!", Toast.LENGTH_SHORT).show();
+            this.populateData();
+        } else {
+            Toast.makeText(getActivity(), "Passcode is invalid", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

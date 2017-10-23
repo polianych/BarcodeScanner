@@ -10,6 +10,7 @@ import org.greenrobot.greendao.database.DatabaseOpenHelper;
 
 import java.util.List;
 import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.query.QueryBuilder;
 
 /**
  * Entity mapped to table "BARCODE_DATABASE".
@@ -86,6 +87,26 @@ public class BarcodeDatabase {
         }
         BarcodeDao targetDao = daoSession.getBarcodeDao();
         return targetDao.queryBuilder().where(BarcodeDao.Properties.BarcodeDatabaseId.eq(id)).count();
+    }
+
+    public Long getBarcodesScansCount() {
+        final DaoSession daoSession = this.daoSession;
+        if (daoSession == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        BarcodeScanDao targetDao = daoSession.getBarcodeScanDao();
+        return targetDao.queryBuilder().where(BarcodeScanDao.Properties.BarcodeDatabaseId.eq(id)).count();
+    }
+
+    public void deleteBarcodeScans() {
+        final DaoSession daoSession = this.daoSession;
+        if (daoSession == null) {
+            throw new DaoException("Entity is detached from DAO context");
+        }
+        BarcodeScanDao targetDao = daoSession.getBarcodeScanDao();
+        QueryBuilder queryBuilder = targetDao.queryBuilder().where(BarcodeScanDao.Properties.BarcodeDatabaseId.eq(id));
+        List<BarcodeScan> scans = queryBuilder.list();
+        targetDao.deleteInTx(scans);
     }
 
     /**

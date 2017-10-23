@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -15,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -25,6 +27,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.CameraSource;
@@ -48,7 +52,6 @@ public class ScanFragment extends Fragment implements OnClickListener {
 
     public static final String SCAN_FRAGMENT_TAG = "fragment:scan";
 
-
     public ScanFragment() {
         // Required empty public constructor
     }
@@ -61,6 +64,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
 
     CameraSource cameraSource;
     TextView txtView;
+    TextView txtScreen;
     SurfaceView cameraView;
     Detector detector;
     MediaPlayer mediaPlayer;
@@ -101,6 +105,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
         Button flashBtn = (Button) RootView.findViewById(R.id.set_flash);
         Button openManualEnterDialogBtn = (Button) RootView.findViewById(R.id.open_manual_enter_dialog);
         this.txtView = (TextView) RootView.findViewById(R.id.txtContent);
+        this.txtScreen = (TextView) RootView.findViewById(R.id.txtScreen);
         this.cameraView = (SurfaceView) RootView.findViewById(R.id.camera_view);
         this.mediaPlayer = new MediaPlayer();
 //        this.mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -108,7 +113,6 @@ public class ScanFragment extends Fragment implements OnClickListener {
 //                activity.mediaPlayer.reset();
 //            }
 //        });
-
 
         if (ContextCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.CAMERA)
@@ -132,8 +136,28 @@ public class ScanFragment extends Fragment implements OnClickListener {
         stopBtn.setOnClickListener(this);
         flashBtn.setOnClickListener(this);
         openManualEnterDialogBtn.setOnClickListener(this);
-
+        this.create43RatioSurface();
         return RootView;
+    }
+
+    private void create43RatioSurface() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int height = 0;
+        int width = 0;
+//        if(metrics.widthPixels < metrics.heightPixels){
+//            width = metrics.widthPixels;
+//            height= metrics.widthPixels * 2 ;
+//        } else {
+//            height= metrics.heightPixels;
+//            width= metrics.heightPixels * 2 ;
+//        }
+        height = (int) Math.round(metrics.heightPixels * 0.65);
+//        Camera camera = getCamera(this.cameraSource);
+//        Camera.Parameters params= camera.getParameters();
+//        this.cameraView.getLayoutParams().width=params.getPreviewSize().height;
+//        this.cameraView.getLayoutParams().height=params.getPreviewSize().width;
+//        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
+        this.cameraView.getLayoutParams().height = height;
     }
 
     @Override
@@ -193,6 +217,7 @@ public class ScanFragment extends Fragment implements OnClickListener {
     public void startBarcodeScan() {
         final ScanFragment activity = this;
         this.txtView.setText("");
+        this.txtScreen.setText("");
         try {
             this.detector.setProcessor(new Detector.Processor<Barcode>() {
                 @Override
@@ -346,14 +371,22 @@ public class ScanFragment extends Fragment implements OnClickListener {
     }
 
     public void processScannedValue(BarcodeScan barcodeScan) {
+        Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(250);
         switch (barcodeScan.getType()) {
             case BarcodeScan.VALID_TYPE:
+                this.txtScreen.setText("ACCESS GRANTED");
+                this.txtScreen.setTextColor(getResources().getColor(R.color.colorSuccess));
                 this.txtView.setText("Success! " + barcodeScan.getCode() + " valid");
                 break;
             case BarcodeScan.NOT_FOUND_TYPE:
+                this.txtScreen.setText("ACCESS DENIED");
+                this.txtScreen.setTextColor(getResources().getColor(R.color.colorError));
                 this.txtView.setText("Error! " + barcodeScan.getCode() + " not found");
                 break;
             case BarcodeScan.PRESENT_TYPE:
+                this.txtScreen.setText("ACCESS DENIED");
+                this.txtScreen.setTextColor(getResources().getColor(R.color.colorError));
                 this.txtView.setText("Error! " + barcodeScan.getCode() + " already scanned");
                 break;
         }

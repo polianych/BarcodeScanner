@@ -23,18 +23,23 @@
             android:layout_height="fill_parent"
             android:orientation="vertical"
             tools:layout_editor_absoluteY="0dp">
-
             <FrameLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="380dp">
                 <SurfaceView
                     android:layout_width="match_parent"
-                    android:layout_height="780px"
+                    android:layout_height="match_parent"
                     android:layout_centerVertical="true"
                     android:layout_alignParentLeft="true"
-                    android:id="@+id/camera_view"
-                    />
+                    android:id="@+id/camera_view"/>
+                <TextView android:text=""
+                    android:textSize="32sp"
+                    android:background="#000"
+                    android:layout_gravity="center_horizontal|center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtScreen"/>
                 <Button
                     android:id="@+id/set_flash"
                     android:drawableTop="@drawable/ic_flashlight"
@@ -51,7 +56,7 @@
                     android:layout_height="50dp"
                     android:layout_alignParentTop="true"
                     />
-                </FrameLayout>
+            </FrameLayout>
             <TextView android:text=""
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -70,8 +75,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:text="Stop Scan" />
-
-
 
         </LinearLayout>
 

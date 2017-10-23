@@ -5,19 +5,70 @@
     android:padding="16dp">
 
     <TextView
-        android:text="asas"
+        android:text="Database Name"
         android:id="@+id/database_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:textSize="30dip"
          />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:text="Barcodes: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="20dip"
+            />
+        <TextView
+            android:id="@+id/barcodes_count"
+            android:text="0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="20dip"
+            />
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:text="Barcodes scans: "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="20dip"
+            />
+        <TextView
+            android:id="@+id/barcodes_scans_count"
+            android:text="0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="20dip"
+            />
+    </LinearLayout>
+
     <Button
         android:id="@+id/start_scan_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="Start Scan"
+        />
+    <Button
+        android:id="@+id/clear_scans_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:textColor="@color/colorError"
+        android:text="Clear ALL Scans"
         />
 
 </LinearLayout>
